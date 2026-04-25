@@ -2,9 +2,14 @@ import Link from "next/link";
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
 import { createProductAction } from "./actions";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+const profile = await getCurrentProfile();
 
+if (!profile || !isInternalUser(profile.role)) {
+  redirect("/login");
+}
 export default async function NewInternalProductPage() {
   const profile = await getCurrentProfile();
   const userRole = profile?.role;

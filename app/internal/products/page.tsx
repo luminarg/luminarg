@@ -8,7 +8,15 @@ import {
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
 import { InternalHeader } from "@/app/components/internal/InternalHeader";
+import { redirect } from "next/navigation";
 
+
+
+const profile = await getCurrentProfile();
+
+if (!profile || !isInternalUser(profile.role)) {
+  redirect("/login");
+}
 export const dynamic = "force-dynamic";
 
 export default async function InternalProductsPage() {

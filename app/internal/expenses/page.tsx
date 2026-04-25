@@ -7,6 +7,13 @@ import {
   getExpenses,
 } from "@/data/expenseService";
 import { createExpenseAction, deleteExpenseAction } from "./actions";
+import { redirect } from "next/navigation";
+
+const profile = await getCurrentProfile();
+
+if (!profile || !isInternalUser(profile.role)) {
+  redirect("/login");
+}
 
 export const dynamic = "force-dynamic";
 

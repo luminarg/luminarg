@@ -3,7 +3,14 @@ import { updateUserRoleAction } from "./actions";
 import { getCurrentProfile } from "@/data/auth";
 import { canManageUsers } from "@/data/roles";
 import { getProfiles } from "@/data/userService";
+import { redirect } from "next/navigation";
+import { isInternalUser } from "@/data/roles";
 
+const profile = await getCurrentProfile();
+
+if (!profile || !isInternalUser(profile.role)) {
+  redirect("/login");
+}
 export const dynamic = "force-dynamic";
 
 const roles = [

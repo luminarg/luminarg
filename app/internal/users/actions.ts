@@ -1,21 +1,43 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { getCurrentProfile } from "@/data/auth";
-import { canManageUsers, UserRole } from "@/data/roles";
-import { updateProfileRole } from "@/data/userService";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-export async function updateUserRoleAction(formData: FormData) {
-  const profile = await getCurrentProfile();
+export async function createUserAction(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const role = formData.get("role") as string;
 
-  if (!profile || !canManageUsers(profile.role)) {
-    throw new Error("No autorizado");
+  const supabase = await createSupabaseServerClient();
+
+  // 🔐 crear usuario en auth
+  const { data: userData, error: authError } =
+    await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+  if (authError) {
+    console.error(authError);
+    throw new Error("Error creando usuario");
   }
 
-  const id = String(formData.get("id") || "");
-  const role = String(formData.get("role") || "minorista") as UserRole;
+  const userId = userData.user.id;
 
-  await updateProfileRole(id, role);
+  // 🧠 crear perfil
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .insert({
+      id: userId,
+      email,
+      role,
+      is_active: true,
+    });
 
-  revalidatePath("/internal/users");
+  if (profileError) {
+    console.error(profileError);
+    throw new Error("Error creando perfil");
+  }
+
+  return { success: true };
 }

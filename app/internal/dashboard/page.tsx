@@ -1,5 +1,14 @@
 import { getDashboardMetrics } from "@/data/dashboard";
 import { ExpensesByMonthChart } from "./components/ExpensesByMonthChart";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/data/auth";
+import { isInternalUser } from "@/data/roles";
+
+const profile = await getCurrentProfile();
+
+if (!profile || !isInternalUser(profile.role)) {
+  redirect("/login");
+}
 
 function formatMoney(value: number) {
   return value.toLocaleString("es-AR", {
