@@ -1,7 +1,16 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
+
+async function getBaseUrl() {
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = host?.includes("localhost") ? "http" : "https";
+
+  return `${protocol}://${host}`;
+}
 
 export async function loginAction(formData: FormData) {
   const email = String(formData.get("email") || "");
@@ -19,16 +28,17 @@ export async function loginAction(formData: FormData) {
     redirect("/login?error=credenciales");
   }
 
-  redirect("/");
+  redirect("/products");
 }
 
 export async function loginWithGoogleAction() {
   const supabase = await createSupabaseServerClient();
+  const baseUrl = getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "http://localhost:3000/auth/callback",
+      redirectTo: `${baseUrl}/auth/callback`,
     },
   });
 
