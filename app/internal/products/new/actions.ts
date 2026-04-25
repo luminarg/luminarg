@@ -17,18 +17,29 @@ function createSlug(value: string) {
     .replace(/(^-|-$)+/g, "");
 }
 
-async function uploadProductImage(slug: string, image: FormDataEntryValue | null) {
-  if (!(image instanceof File) || image.size === 0) {
+async function uploadProductImage(
+  slug: string,
+  image: FormDataEntryValue | null
+) {
+  if (!image || typeof image === "string") {
     return null;
   }
 
-  const extension = image.name.split(".").pop() || "jpg";
+  const file = image as File;
+
+  if (!file.name || file.size === 0) {
+    return null;
+  }
+
+  const extension = file.name.split(".").pop() || "jpg";
   const filePath = `${slug}-${Date.now()}.${extension}`;
+
+  const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error } = await supabaseAdmin.storage
     .from("product-images")
-    .upload(filePath, image, {
-      contentType: image.type,
+    .upload(filePath, buffer, {
+      contentType: file.type || "image/jpeg",
       upsert: true,
     });
 

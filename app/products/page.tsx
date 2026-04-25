@@ -2,6 +2,12 @@ import ProductCard from "@/app/components/ProductCard";
 import { canSeeWholesalePrice, isInternalUser } from "@/data/roles";
 import { getPublicProducts } from "@/data/productService";
 import { getCurrentProfile } from "@/data/auth";
+import type { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "Catálogo de luminarias | Luminarg",
+  description:
+    "Explorá el catálogo de luminarias Luminarg: diseños modernos, decorativos y funcionales para hogares, comercios y proyectos.",
+};
 export const dynamic = "force-dynamic";
 export default async function ProductsPage() {
   const profile = await getCurrentProfile();

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getCurrentProfile } from "@/data/auth";
+import { isInternalUser } from "@/data/roles";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";

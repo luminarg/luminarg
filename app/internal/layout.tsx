@@ -8,17 +8,7 @@ export default async function InternalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
 
-if (!user) {
-  redirect("/login");
-}
-
-const profile = await getCurrentProfile();
-
-if (!profile || !isInternalUser(profile.role)) {
-  redirect("/login");
-}
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">

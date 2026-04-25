@@ -26,11 +26,13 @@ export async function getCurrentProfile() {
   if (!user) return null;
 
   const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
+  .from("profiles")
+  .select("*")
+  .eq("id", user.id)
+  .maybeSingle();
+if (error) {
+  console.error("Error fetching current profile:", error);
+}
   if (error) {
     console.error("Error fetching current profile:", error);
     return null;
