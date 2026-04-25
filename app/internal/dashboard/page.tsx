@@ -1,13 +1,10 @@
-import { getDashboardMetrics } from "@/data/dashboard";
-import { ExpensesByMonthChart } from "./components/ExpensesByMonthChart";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
+import { getDashboardMetrics } from "@/data/dashboard";
+import { ExpensesByMonthChart } from "./components/ExpensesByMonthChart";
 
-
-if (!profile || !isInternalUser(profile.role)) {
-  redirect("/login");
-}
+export const dynamic = "force-dynamic";
 
 function formatMoney(value: number) {
   return value.toLocaleString("es-AR", {
@@ -17,7 +14,11 @@ function formatMoney(value: number) {
 }
 
 export default async function DashboardPage() {
-    const profile = await getCurrentProfile();
+  const profile = await getCurrentProfile();
+
+  if (!profile || !isInternalUser(profile.role)) {
+    redirect("/login");
+  }
 
   const metrics = await getDashboardMetrics();
 
@@ -44,7 +45,6 @@ export default async function DashboardPage() {
         </p>
       </header>
 
-      {/* MÉTRICAS */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           title="Gastos"
@@ -62,9 +62,7 @@ export default async function DashboardPage() {
           title="Stock total"
           value={metrics.products.totalStock}
           description="Unidades disponibles"
-          variant={
-            metrics.products.totalStock === 0 ? "danger" : "success"
-          }
+          variant={metrics.products.totalStock === 0 ? "danger" : "success"}
         />
 
         <MetricCard
@@ -75,9 +73,8 @@ export default async function DashboardPage() {
         />
       </section>
 
-      {/* GASTOS */}
       <section className="grid gap-4 xl:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+        <div className="border border-white/10 bg-white/[0.03] p-6">
           <h2 className="text-lg font-semibold text-white">
             Gastos por moneda
           </h2>
@@ -92,7 +89,7 @@ export default async function DashboardPage() {
                 ([currency, amount]) => (
                   <div
                     key={currency}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-4"
+                    className="flex items-center justify-between border border-white/10 bg-black/30 p-4"
                   >
                     <span className="text-neutral-300">{currency}</span>
                     <span className="font-bold text-white">
@@ -105,13 +102,13 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+        <div className="border border-white/10 bg-white/[0.03] p-6">
           <h2 className="text-lg font-semibold text-white">
             Estado de gastos
           </h2>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-green-800 bg-green-900/20 p-4">
+            <div className="border border-green-800 bg-green-900/20 p-4">
               <p className="text-sm text-green-400">Pagados</p>
               <p className="mt-2 text-2xl font-bold text-white">
                 {formatMoney(metrics.expenses.byStatus.paid)}
@@ -121,7 +118,7 @@ export default async function DashboardPage() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-red-800 bg-red-900/20 p-4">
+            <div className="border border-red-800 bg-red-900/20 p-4">
               <p className="text-sm text-red-400">Pendientes</p>
               <p className="mt-2 text-2xl font-bold text-white">
                 {formatMoney(metrics.expenses.byStatus.pending)}
@@ -134,8 +131,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* ALERTAS */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+      <section className="border border-white/10 bg-white/[0.03] p-6">
         <h2 className="text-lg font-semibold text-white">
           Alertas inteligentes
         </h2>
@@ -150,11 +146,9 @@ export default async function DashboardPage() {
               {metrics.products.outOfStock.map((product) => (
                 <div
                   key={`out-${product.id}`}
-                  className="rounded-xl border border-red-700 bg-red-900/20 p-4"
+                  className="border border-red-700 bg-red-900/20 p-4"
                 >
-                  <p className="font-semibold text-red-400">
-                    Sin stock
-                  </p>
+                  <p className="font-semibold text-red-400">Sin stock</p>
                   <p className="text-sm text-neutral-300">
                     {product.name} (stock {product.stock})
                   </p>
@@ -164,11 +158,9 @@ export default async function DashboardPage() {
               {metrics.products.lowStock.map((product) => (
                 <div
                   key={`low-${product.id}`}
-                  className="rounded-xl border border-yellow-700 bg-yellow-900/20 p-4"
+                  className="border border-yellow-700 bg-yellow-900/20 p-4"
                 >
-                  <p className="font-semibold text-yellow-400">
-                    Stock bajo
-                  </p>
+                  <p className="font-semibold text-yellow-400">Stock bajo</p>
                   <p className="text-sm text-neutral-300">
                     {product.name} (stock {product.stock})
                   </p>
@@ -178,7 +170,7 @@ export default async function DashboardPage() {
               {metrics.alerts.highPendingExpenses.map((expense) => (
                 <div
                   key={`expense-${expense.id}`}
-                  className="rounded-xl border border-orange-700 bg-orange-900/20 p-4"
+                  className="border border-orange-700 bg-orange-900/20 p-4"
                 >
                   <p className="font-semibold text-orange-400">
                     Gasto pendiente alto
@@ -194,13 +186,10 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* GRÁFICO */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-        <h2 className="text-lg font-semibold text-white">
-          Gastos por mes
-        </h2>
+      <section className="border border-white/10 bg-white/[0.03] p-6">
+        <h2 className="text-lg font-semibold text-white">Gastos por mes</h2>
 
-        <div className="mt-4">
+        <div className="mt-4 min-h-[320px]">
           <ExpensesByMonthChart data={expensesChartData} />
         </div>
       </section>
@@ -227,7 +216,7 @@ function MetricCard({
   };
 
   return (
-    <div className={`rounded-2xl border p-6 ${styles[variant]}`}>
+    <div className={`border p-6 ${styles[variant]}`}>
       <p className="text-sm text-neutral-400">{title}</p>
       <p className="mt-3 text-3xl font-bold text-white">{value}</p>
       <p className="mt-2 text-sm text-neutral-400">{description}</p>

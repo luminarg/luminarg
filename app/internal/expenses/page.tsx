@@ -9,12 +9,6 @@ import {
 import { createExpenseAction, deleteExpenseAction } from "./actions";
 import { redirect } from "next/navigation";
 
-const profile = await getCurrentProfile();
-
-if (!profile || !isInternalUser(profile.role)) {
-  redirect("/login");
-}
-
 export const dynamic = "force-dynamic";
 
 const expenseTypes = [
@@ -53,19 +47,7 @@ export default async function InternalExpensesPage({
   const profile = await getCurrentProfile();
 
   if (!profile || !isInternalUser(profile.role)) {
-    return (
-      <main className="min-h-screen bg-[#0a0a0a] px-6 py-20 text-white">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-light">Acceso restringido</h1>
-          <p className="mt-4 text-neutral-400">
-            Esta sección está disponible solo para usuarios internos.
-          </p>
-          <Link href="/" className="mt-6 inline-block text-[#d6b36a]">
-            Volver al inicio
-          </Link>
-        </div>
-      </main>
-    );
+    redirect("/login");
   }
 
   const filters = await searchParams;
