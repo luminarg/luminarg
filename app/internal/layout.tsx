@@ -1,18 +1,24 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
+import { getCurrentUser, getCurrentProfile } from "@/data/auth";
 
 export default async function InternalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const profile = await getCurrentProfile();
+  const user = await getCurrentUser();
 
-  if (!profile || !isInternalUser(profile.role)) {
-    redirect("/login");
-  }
+if (!user) {
+  redirect("/login");
+}
+
+const profile = await getCurrentProfile();
+
+if (!profile || !isInternalUser(profile.role)) {
+  redirect("/login");
+}
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
