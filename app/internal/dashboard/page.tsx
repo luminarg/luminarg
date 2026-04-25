@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
 
-const profile = await getCurrentProfile();
 
 if (!profile || !isInternalUser(profile.role)) {
   redirect("/login");
@@ -18,6 +17,8 @@ function formatMoney(value: number) {
 }
 
 export default async function DashboardPage() {
+    const profile = await getCurrentProfile();
+
   const metrics = await getDashboardMetrics();
 
   const expensesChartData = Object.entries(metrics.expenses.byMonth)
