@@ -1,10 +1,19 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentProfile } from "@/data/auth";
+import { isInternalUser } from "@/data/roles";
 
-export default function InternalLayout({
+export default async function InternalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const profile = await getCurrentProfile();
+
+  if (!profile || !isInternalUser(profile.role)) {
+    redirect("/login");
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="flex min-h-screen">
@@ -98,12 +107,14 @@ export default function InternalLayout({
               >
                 Dash
               </Link>
+
               <Link
                 href="/internal/products"
                 className="rounded-full border border-white/10 px-3 py-1 text-neutral-300"
               >
                 Prod.
               </Link>
+
               <Link
                 href="/internal/expenses"
                 className="rounded-full border border-white/10 px-3 py-1 text-neutral-300"
