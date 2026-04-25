@@ -11,13 +11,10 @@ import {
 import { uploadProductImageAction } from "../actions";
 import { Product } from "@/data/schemas";
 
-
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
 };
 
 export default async function InternalProductPage({ params }: PageProps) {
@@ -26,13 +23,13 @@ export default async function InternalProductPage({ params }: PageProps) {
   const profile = await getCurrentProfile();
 
   if (!profile || !isInternalUser(profile.role)) {
-    return redirect("/");
+    redirect("/login");
   }
 
   const product = await getProductBySlug(slug);
 
   if (!product) {
-    return notFound();
+    notFound();
   }
 
   const productSlug = product.slug;
@@ -49,27 +46,27 @@ export default async function InternalProductPage({ params }: PageProps) {
       retailPrice: Number(formData.get("retailPrice") || 0),
       wholesalePrice: Number(formData.get("wholesalePrice") || 0),
       stock: Number(formData.get("stock") || 0),
-      status: String(
-        formData.get("status") || "Disponible"
-      ) as Product["status"],
+      status: String(formData.get("status") || "Disponible") as Product["status"],
       description: String(formData.get("description") || ""),
       longDescription: String(formData.get("longDescription") || ""),
       isActive: formData.get("isActive") === "on",
+      isFeatured: formData.get("isFeatured") === "on",
       imageUrl: currentImageUrl,
-      
     });
 
     revalidatePath("/products");
     revalidatePath("/internal/products");
     revalidatePath(`/internal/products/${productSlug}`);
     revalidatePath(`/products/${productSlug}`);
+    revalidatePath("/");
+
     redirect("/internal/products");
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] px-6 py-16 text-white">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-10 flex items-center justify-between">
+    <main className="min-h-screen px-6 py-16 text-white">
+      <div className="mx-auto max-w-5xl space-y-8">
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
               Gestión interna
@@ -79,16 +76,16 @@ export default async function InternalProductPage({ params }: PageProps) {
 
           <Link
             href="/internal/products"
-            className="rounded-full border border-white/10 px-4 py-2 text-sm text-neutral-300 hover:border-white/30"
+            className="border border-white/10 px-4 py-2 text-sm text-neutral-300 hover:border-white/30"
           >
             Volver
           </Link>
         </div>
 
-        <div className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-8">
+        <section className="border border-white/10 bg-white/[0.03] p-8">
           <h2 className="mb-4 text-xl font-light">Imagen del producto</h2>
 
-          <div className="mb-6 h-[260px] w-full overflow-hidden rounded-xl bg-black">
+          <div className="mb-6 h-[260px] w-full overflow-hidden bg-black">
             {product.imageUrl ? (
               <Image
                 src={product.imageUrl}
@@ -104,178 +101,139 @@ export default async function InternalProductPage({ params }: PageProps) {
             )}
           </div>
 
-          <form
-  action={uploadProductImageAction}
-  encType="multipart/form-data"
-  className="flex flex-col gap-4"
->
+          <form action={uploadProductImageAction} className="flex flex-col gap-4">
             <input type="hidden" name="slug" value={product.slug} />
-
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              className="rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-            />
+            <input type="file" name="image" accept="image/*" className="input-dark" />
 
             <button
               type="submit"
-              className="w-fit rounded-full bg-white px-6 py-3 text-sm font-medium text-black"
+              className="w-fit bg-white px-6 py-3 text-sm font-medium text-black"
             >
               Subir / reemplazar imagen
             </button>
           </form>
-        </div>
+        </section>
 
-        <form
-          action={update}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-8"
-        >
+        <form action={update} className="border border-white/10 bg-white/[0.03] p-8">
           <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Nombre
-              </label>
-              <input
-                name="name"
-                defaultValue={product.name}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-              />
-            </div>
+            <Field label="Nombre">
+              <input name="name" defaultValue={product.name} className="input-dark" />
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                SKU
-              </label>
-              <input
-                name="sku"
-                defaultValue={product.sku}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-              />
-            </div>
+            <Field label="SKU">
+              <input name="sku" defaultValue={product.sku} className="input-dark" />
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Tipo
-              </label>
-              <input
-                name="type"
-                defaultValue={product.type}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-              />
-            </div>
+            <Field label="Tipo">
+              <input name="type" defaultValue={product.type} className="input-dark" />
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Colección
-              </label>
+            <Field label="Colección">
               <input
                 name="collection"
                 defaultValue={product.collection}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Precio minorista
-              </label>
+            <Field label="Precio minorista">
               <input
                 name="retailPrice"
                 type="number"
                 defaultValue={product.retailPrice}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Precio mayorista
-              </label>
+            <Field label="Precio mayorista">
               <input
                 name="wholesalePrice"
                 type="number"
                 defaultValue={product.wholesalePrice}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Stock
-              </label>
+            <Field label="Stock">
               <input
                 name="stock"
                 type="number"
                 defaultValue={product.stock}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Estado
-              </label>
-              <select
-                name="status"
-                defaultValue={product.status}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-              >
+            <Field label="Estado">
+              <select name="status" defaultValue={product.status} className="input-dark">
                 <option value="Disponible">Disponible</option>
                 <option value="Bajo pedido">Bajo pedido</option>
                 <option value="Sin stock">Sin stock</option>
               </select>
-            </div>
+            </Field>
           </div>
 
-          <label className="mt-6 flex items-center gap-3 text-sm text-neutral-300">
-            <input
-              type="checkbox"
-              name="isActive"
-              defaultChecked={product.isActive}
-            />
-            Producto activo
-          </label>
-
-          <div className="mt-6">
-            <label className="mb-2 block text-sm text-neutral-400">
-              Descripción corta
+          <div className="mt-6 flex flex-col gap-3 text-sm text-neutral-300 sm:flex-row sm:gap-8">
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="isActive" defaultChecked={product.isActive} />
+              Producto activo
             </label>
-            <textarea
-              name="description"
-              defaultValue={product.description}
-              className="min-h-[100px] w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-            />
+
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="isFeatured"
+                defaultChecked={product.isFeatured}
+              />
+              Producto destacado
+            </label>
           </div>
 
           <div className="mt-6">
-            <label className="mb-2 block text-sm text-neutral-400">
-              Descripción larga
-            </label>
-            <textarea
-              name="longDescription"
-              defaultValue={product.longDescription}
-              className="min-h-[160px] w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-            />
+            <Field label="Descripción corta">
+              <textarea
+                name="description"
+                defaultValue={product.description}
+                className="input-dark min-h-[100px]"
+              />
+            </Field>
+          </div>
+
+          <div className="mt-6">
+            <Field label="Descripción larga">
+              <textarea
+                name="longDescription"
+                defaultValue={product.longDescription}
+                className="input-dark min-h-[160px]"
+              />
+            </Field>
           </div>
 
           <div className="mt-8 flex gap-4">
-            <button
-              type="submit"
-              className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black"
-            >
+            <button type="submit" className="bg-white px-6 py-3 text-sm font-medium text-black">
               Guardar cambios
             </button>
 
-            <Link
-              href="/internal/products"
-              className="rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-white"
-            >
+            <Link href="/internal/products" className="border border-white/10 px-6 py-3 text-sm">
               Cancelar
             </Link>
           </div>
         </form>
       </div>
     </main>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm text-neutral-400">{label}</span>
+      {children}
+    </label>
   );
 }

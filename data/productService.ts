@@ -29,11 +29,7 @@ export async function getPublicProducts(): Promise<Product[]> {
     .eq("is_active", true)
     .order("id", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching public products:", error);
-    return [];
-  }
-
+  if (error) return [];
   return Array.isArray(data) ? data.map(mapProduct) : [];
 }
 
@@ -45,11 +41,7 @@ export async function getFeaturedProducts(): Promise<Product[]> {
     .eq("is_featured", true)
     .order("id", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching featured products:", error);
-    return [];
-  }
-
+  if (error) return [];
   return Array.isArray(data) ? data.map(mapProduct) : [];
 }
 
@@ -59,11 +51,7 @@ export async function getAllProducts(): Promise<Product[]> {
     .select("*")
     .order("id", { ascending: true });
 
-  if (error) {
-    console.error("Error fetching all products:", error);
-    return [];
-  }
-
+  if (error) return [];
   return Array.isArray(data) ? data.map(mapProduct) : [];
 }
 
@@ -74,11 +62,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     .eq("slug", slug)
     .single();
 
-  if (error) {
-    console.error("Error fetching product by slug:", error);
-    return null;
-  }
-
+  if (error) return null;
   return data ? mapProduct(data) : null;
 }
 
@@ -94,6 +78,7 @@ type UpdateProductInput = {
   description: string;
   longDescription: string;
   isActive: boolean;
+  isFeatured: boolean;
   imageUrl?: string | null;
 };
 
@@ -115,6 +100,7 @@ export async function updateProductBySlug(
       description: input.description,
       long_description: input.longDescription,
       is_active: input.isActive,
+      is_featured: input.isFeatured,
       image_url: input.imageUrl ?? null,
     })
     .eq("slug", slug)
@@ -122,7 +108,6 @@ export async function updateProductBySlug(
     .single();
 
   if (error) {
-    console.error("Error updating product:", error);
     throw new Error("No se pudo actualizar el producto");
   }
 
@@ -169,7 +154,6 @@ export async function createProduct(input: CreateProductInput) {
     .single();
 
   if (error) {
-    console.error("Error creating product:", error);
     throw new Error("No se pudo crear el producto");
   }
 
@@ -179,15 +163,12 @@ export async function createProduct(input: CreateProductInput) {
 export async function setProductActiveState(slug: string, isActive: boolean) {
   const { data, error } = await supabaseAdmin
     .from("products")
-    .update({
-      is_active: isActive,
-    })
+    .update({ is_active: isActive })
     .eq("slug", slug)
     .select()
     .single();
 
   if (error) {
-    console.error("Error updating product active state:", error);
     throw new Error("No se pudo cambiar el estado del producto");
   }
 
@@ -197,13 +178,10 @@ export async function setProductActiveState(slug: string, isActive: boolean) {
 export async function updateProductImage(slug: string, imageUrl: string) {
   const { error } = await supabaseAdmin
     .from("products")
-    .update({
-      image_url: imageUrl,
-    })
+    .update({ image_url: imageUrl })
     .eq("slug", slug);
 
   if (error) {
-    console.error("Error updating product image:", error);
     throw new Error("No se pudo guardar la imagen");
   }
 }

@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { updateProductBySlug } from "@/data/productService";
+import {
+  getProductBySlug,
+  updateProductBySlug,
+} from "@/data/productService";
 import { Product } from "@/data/schemas";
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
@@ -12,6 +15,12 @@ export async function saveProductAction(slug: string, formData: FormData) {
 
   if (!profile || !isInternalUser(profile.role)) {
     throw new Error("No autorizado");
+  }
+
+  const currentProduct = await getProductBySlug(slug);
+
+  if (!currentProduct) {
+    throw new Error("Producto no encontrado");
   }
 
   const status = formData.get("status") as Product["status"];
@@ -28,6 +37,8 @@ export async function saveProductAction(slug: string, formData: FormData) {
     description: String(formData.get("description") || ""),
     longDescription: String(formData.get("longDescription") || ""),
     isActive: formData.get("isActive") === "on",
+    isFeatured: formData.get("isFeatured") === "on",
+    imageUrl: currentProduct.imageUrl ?? null,
   });
 
   revalidatePath("/products");
