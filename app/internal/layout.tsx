@@ -1,15 +1,10 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { isInternalUser } from "@/data/roles";
-import { getCurrentUser, getCurrentProfile } from "@/data/auth";
 
 export default async function InternalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <div className="flex min-h-screen">
@@ -88,7 +83,7 @@ export default async function InternalLayout({
 
         {/* MOBILE TOP BAR */}
         <div className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[#050505]/95 px-4 py-3 backdrop-blur lg:hidden">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <Link
               href="/internal/dashboard"
               className="text-sm font-semibold"
@@ -96,7 +91,7 @@ export default async function InternalLayout({
               Luminarg Admin
             </Link>
 
-            <div className="flex gap-2 text-xs">
+            <div className="flex gap-2 overflow-x-auto text-xs">
               <Link
                 href="/internal/dashboard"
                 className="rounded-full border border-white/10 px-3 py-1 text-neutral-300"
@@ -116,6 +111,13 @@ export default async function InternalLayout({
                 className="rounded-full border border-white/10 px-3 py-1 text-neutral-300"
               >
                 Gastos
+              </Link>
+
+              <Link
+                href="/internal/sales"
+                className="rounded-full border border-white/10 px-3 py-1 text-neutral-300"
+              >
+                Ventas
               </Link>
             </div>
           </div>
