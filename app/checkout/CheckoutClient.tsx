@@ -27,10 +27,13 @@ export default function CheckoutClient() {
 
       const res = await checkoutAction(formData);
 
-      if (res.success) {
-        clearCart();
-        window.location.href = `/gracias/${res.saleId}`;
-      }
+      if (!res.success) {
+  setError(res.error || "No se pudo confirmar el pedido");
+  return;
+}
+
+clearCart();
+window.location.href = `/gracias/${res.saleId}`;
     } catch (err: any) {
       setError(err?.message || "No se pudo confirmar el pedido");
     } finally {
