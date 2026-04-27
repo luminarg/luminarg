@@ -18,7 +18,7 @@ export async function createSupabaseServerClient() {
               cookieStore.set(name, value, options);
             });
           } catch {
-            // Evita error cuando se llama desde Server Components.
+            // Ignorar en Server Components.
           }
         },
       },

@@ -50,7 +50,7 @@ export default async function AccountPage() {
 
   return (
     <main className="min-h-screen bg-[#070707] text-white">
-      <Header />
+      <Header isLoggedIn={true} isInternal={false} />
 
       <section className="px-4 py-12 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-6xl space-y-10">

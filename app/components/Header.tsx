@@ -1,16 +1,16 @@
 import Link from "next/link";
-import { getCurrentProfile, getCurrentUser } from "@/data/auth";
-import { isInternalUser } from "@/data/roles";
 import CartDropdown from "./CartDropdown";
 import MobileMenu from "./MobileMenu";
 
-export default async function Header() {
-  const user = await getCurrentUser();
-  const profile = await getCurrentProfile();
+type Props = {
+  isLoggedIn?: boolean;
+  isInternal?: boolean;
+};
 
-  const isLoggedIn = Boolean(user);
-  const isInternal = Boolean(profile && isInternalUser(profile.role));
-
+export default function Header({
+  isLoggedIn = false,
+  isInternal = false,
+}: Props) {
   return (
     <header className="relative z-[9998] border-b border-white/10 bg-[#070707]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
@@ -22,7 +22,9 @@ export default async function Header() {
           <Link href="/">Inicio</Link>
           <Link href="/products">Catálogo</Link>
 
-          {isLoggedIn && !isInternal && <Link href="/account">Mi cuenta</Link>}
+          {isLoggedIn && !isInternal && (
+            <Link href="/account">Mi cuenta</Link>
+          )}
 
           {isInternal && (
             <>
