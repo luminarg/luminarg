@@ -24,16 +24,29 @@ export async function loginAction(formData: FormData) {
   });
 
   if (error) {
-    console.error("Login error:", error.message);
     redirect("/login?error=credenciales");
+  }
+
+  // 🔥 obtener perfil
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user?.id)
+    .single();
+
+  if (profile?.role === "admin" || profile?.role === "internal") {
+    redirect("/internal/dashboard");
   }
 
   redirect("/products");
 }
-
 export async function loginWithGoogleAction() {
   const supabase = await createSupabaseServerClient();
-  const baseUrl = getBaseUrl();
+  const baseUrl = await getBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

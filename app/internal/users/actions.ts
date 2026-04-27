@@ -1,31 +1,26 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/lib/supabaseServer";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function createUserAction(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const role = formData.get("role") as string;
 
-  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
 
-  // 🔐 crear usuario en auth
-  const { data: userData, error: authError } =
-    await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-
-  if (authError) {
-    console.error(authError);
+  if (error) {
+    console.error(error);
     throw new Error("Error creando usuario");
   }
 
-  const userId = userData.user.id;
+  const userId = data.user.id;
 
-  // 🧠 crear perfil
-  const { error: profileError } = await supabase
+  const { error: profileError } = await supabaseAdmin
     .from("profiles")
     .insert({
       id: userId,
