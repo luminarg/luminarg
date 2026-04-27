@@ -1,12 +1,9 @@
 import Link from "next/link";
+import { redirect, notFound } from "next/navigation";
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
-import { getExpenseById } from "@/data/expenseService";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { updateExpenseAction } from "./actions";
-import {
-  calculateExpenseTotals,
-  getExpenses,
-} from "@/data/expenseService";
 
 export const dynamic = "force-dynamic";
 
@@ -31,118 +28,80 @@ const categories = [
   "otros",
 ];
 
-type ExpenseEditPageProps = {
-  params: Promise<{
-    id: string;
-  }>;
+type PageProps = {
+  params: Promise<{ id: string }>;
 };
 
-export default async function ExpenseEditPage({ params }: ExpenseEditPageProps) {
-  const { id } = await params;
-  const expenseId = Number(id);
-
+export default async function ExpenseEditPage({ params }: PageProps) {
   const profile = await getCurrentProfile();
 
   if (!profile || !isInternalUser(profile.role)) {
-    return (
-      <main className="min-h-screen bg-[#0a0a0a] px-6 py-20 text-white">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-light">Acceso restringido</h1>
-          <p className="mt-4 text-neutral-400">
-            Esta sección está disponible solo para usuarios internos.
-          </p>
-
-          <Link href="/" className="mt-6 inline-block text-[#d6b36a]">
-            Volver al inicio
-          </Link>
-        </div>
-      </main>
-    );
+    redirect("/login");
   }
 
-  const expense = await getExpenseById(expenseId);
+  const { id } = await params;
+  const expenseId = Number(id);
 
-  if (!expense) {
-    return (
-      <main className="min-h-screen bg-[#0a0a0a] px-6 py-20 text-white">
-        <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-light">Gasto no encontrado</h1>
+  const { data: expense, error } = await supabaseAdmin
+    .from("expenses")
+    .select("*")
+    .eq("id", expenseId)
+    .single();
 
-          <Link
-            href="/internal/expenses"
-            className="mt-6 inline-block text-[#d6b36a]"
-          >
-            Volver a finanzas
-          </Link>
-        </div>
-      </main>
-    );
+  if (error || !expense) {
+    notFound();
   }
 
-  const saveAction = updateExpenseAction.bind(null, expense.id);
+  const saveAction = updateExpenseAction.bind(null, expenseId);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] px-6 py-16 text-white">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-10 flex items-center justify-between">
+    <main className="min-h-screen px-4 py-10 text-white sm:px-6">
+      <div className="mx-auto max-w-4xl space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
-              Finanzas internas
+              Finanzas
             </p>
             <h1 className="mt-3 text-4xl font-light">Editar gasto</h1>
           </div>
 
           <Link
             href="/internal/expenses"
-            className="rounded-full border border-white/10 px-4 py-2 text-sm text-neutral-300 hover:border-white/30"
+            className="w-fit border border-white/10 px-4 py-2 text-sm text-neutral-300 hover:border-white/30"
           >
-            Volver
+            Volver a gastos
           </Link>
         </div>
 
         <form
           action={saveAction}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-8"
+          className="border border-white/10 bg-white/[0.03] p-6 sm:p-8"
         >
-          <div className="grid gap-6 md:grid-cols-3">
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Fecha
-              </label>
+          <div className="grid gap-6 md:grid-cols-2">
+            <Field label="Fecha">
               <input
                 name="expenseDate"
                 type="date"
-                required
-                defaultValue={expense.expenseDate}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                defaultValue={expense.expense_date || ""}
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Tipo
-              </label>
-              <select
-                name="type"
-                defaultValue={expense.type}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-              >
+            <Field label="Tipo">
+              <select name="type" defaultValue={expense.type} className="input-dark">
                 {expenseTypes.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
                   </option>
                 ))}
               </select>
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Categoría
-              </label>
+            <Field label="Categoría">
               <select
                 name="category"
                 defaultValue={expense.category}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -150,119 +109,102 @@ export default async function ExpenseEditPage({ params }: ExpenseEditPageProps) 
                   </option>
                 ))}
               </select>
-            </div>
-          </div>
+            </Field>
 
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Importe
-              </label>
+            <Field label="Importe">
               <input
                 name="amount"
                 type="number"
-                required
                 defaultValue={expense.amount}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Moneda
-              </label>
+            <Field label="Moneda">
               <select
                 name="currency"
-                defaultValue={expense.currency}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                defaultValue={expense.currency || "ARS"}
+                className="input-dark"
               >
                 <option value="ARS">ARS</option>
                 <option value="USD">USD</option>
                 <option value="CNY">CNY</option>
               </select>
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Pagado por
-              </label>
+            <Field label="Pagado por">
               <input
                 name="paidBy"
-                defaultValue={expense.paidBy || ""}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                defaultValue={expense.paid_by || ""}
+                className="input-dark"
               />
-            </div>
-          </div>
+            </Field>
 
-          <div className="mt-6">
-            <label className="mb-2 block text-sm text-neutral-400">
-              Descripción
-            </label>
-            <input
-              name="description"
-              required
-              defaultValue={expense.description}
-              className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-            />
-          </div>
-
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Medio de pago
-              </label>
+            <Field label="Medio de pago">
               <input
                 name="paymentMethod"
-                defaultValue={expense.paymentMethod || ""}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                defaultValue={expense.payment_method || ""}
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Proveedor
-              </label>
+            <Field label="Proveedor">
               <input
                 name="supplier"
                 defaultValue={expense.supplier || ""}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                className="input-dark"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-neutral-400">
-                Nº factura / comprobante
-              </label>
+            <Field label="Factura / comprobante">
               <input
                 name="invoiceNumber"
-                defaultValue={expense.invoiceNumber || ""}
-                className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
+                defaultValue={expense.invoice_number || ""}
+                className="input-dark"
               />
-            </div>
+            </Field>
           </div>
 
           <div className="mt-6">
-            <label className="mb-2 block text-sm text-neutral-400">
-              Notas
-            </label>
-            <textarea
-              name="notes"
-              defaultValue={expense.notes || ""}
-              className="min-h-[120px] w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-            />
+            <Field label="Descripción">
+              <textarea
+                name="description"
+                defaultValue={expense.description || ""}
+                className="input-dark min-h-[100px]"
+              />
+            </Field>
           </div>
 
-          <div className="mt-8 flex gap-4">
+          <div className="mt-6">
+            <Field label="Notas">
+              <textarea
+                name="notes"
+                defaultValue={expense.notes || ""}
+                className="input-dark min-h-[120px]"
+              />
+            </Field>
+          </div>
+
+          <label className="mt-6 flex items-center gap-3 text-sm text-neutral-300">
+            <input
+              type="checkbox"
+              name="isPaid"
+              defaultChecked={Boolean(expense.is_paid)}
+            />
+            Gasto pagado
+          </label>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <button
               type="submit"
-              className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black"
+              className="bg-white px-6 py-3 text-sm font-medium text-black"
             >
               Guardar cambios
             </button>
 
             <Link
               href="/internal/expenses"
-              className="rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-white"
+              className="border border-white/10 px-6 py-3 text-center text-sm text-white"
             >
               Cancelar
             </Link>
@@ -270,5 +212,20 @@ export default async function ExpenseEditPage({ params }: ExpenseEditPageProps) 
         </form>
       </div>
     </main>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm text-neutral-400">{label}</span>
+      {children}
+    </label>
   );
 }
