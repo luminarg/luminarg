@@ -2,15 +2,7 @@ import Header from "@/app/components/Header";
 import ProductCard from "@/app/components/ProductCard";
 import { canSeeWholesalePrice, isInternalUser } from "@/data/roles";
 import { getPublicProducts } from "@/data/productService";
-import { getCurrentProfile, getCurrentUser } from "@/data/auth";
 import type { Metadata } from "next";
-
-const user = await getCurrentUser();
-const profile = await getCurrentProfile();
-
-const isLoggedIn = Boolean(user);
-const isInternal = Boolean(profile && isInternalUser(profile.role));
-const customerType = profile?.role ?? "minorista";
 
 export const metadata: Metadata = {
   title: "Catálogo de luminarias | Luminarg",
@@ -21,13 +13,12 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
-  const profile = await getCurrentProfile();
-  const customerType = profile?.role ?? "minorista";
+  const customerType = "minorista";
   const products = await getPublicProducts();
 
   return (
     <main className="min-h-screen bg-[#070707] text-white">
-      <Header isLoggedIn={isLoggedIn} isInternal={isInternal} />
+      <Header isLoggedIn={false} isInternal={false} />
 
       <section className="px-6 py-12 lg:py-16">
         <div className="mx-auto max-w-7xl">
@@ -37,21 +28,15 @@ export default async function ProductsPage() {
                 Luminarg
               </p>
 
-              <h1 className="mt-3 text-4xl font-light">
-                {isInternalUser(customerType)
-                  ? "Vista interna de catálogo"
-                  : "Catálogo"}
-              </h1>
+              <h1 className="mt-3 text-4xl font-light">Catálogo</h1>
 
               <p className="mt-3 max-w-2xl text-neutral-400">
-                {isInternalUser(customerType)
-                  ? "Visualización operativa de productos, stock y estado comercial."
-                  : "Explorá la selección de luminarias LUMINARG y encontrá la pieza ideal para tu espacio."}
+                Explorá la selección de luminarias LUMINARG y encontrá la pieza ideal para tu espacio.
               </p>
             </div>
 
             <div className="rounded-full border border-white/10 px-4 py-2 text-sm text-neutral-400">
-              Vista actual: {customerType}
+              Vista actual: minorista
             </div>
           </div>
 
