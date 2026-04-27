@@ -10,7 +10,7 @@ export default async function Header() {
   const isLoggedIn = Boolean(profile);
 
   return (
-    <header className="border-b border-white/10 bg-[#070707]/95 backdrop-blur">
+    <header className="relative z-[9998] border-b border-white/10 bg-[#070707]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <Link href="/" className="text-xl font-light tracking-[0.35em]">
           LUMIN<span className="text-[#d6b36a]">A</span>RG
