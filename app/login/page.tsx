@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { loginAction, loginWithGoogleAction } from "./actions";
+import { loginAction } from "./actions";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -29,14 +29,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           )}
 
-          <form action={loginWithGoogleAction}>
-            <button
-              type="submit"
-              className="mb-6 w-full rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-white hover:border-white/30"
-            >
-              Continuar con Google
-            </button>
-          </form>
+          
 
           <div className="mb-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/10" />
