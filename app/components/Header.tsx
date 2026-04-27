@@ -2,7 +2,7 @@ import Link from "next/link";
 import CartDropdown from "./CartDropdown";
 import MobileMenu from "./MobileMenu";
 
-type Props = {
+type HeaderProps = {
   isLoggedIn?: boolean;
   isInternal?: boolean;
 };
@@ -10,7 +10,7 @@ type Props = {
 export default function Header({
   isLoggedIn = false,
   isInternal = false,
-}: Props) {
+}: HeaderProps) {
   return (
     <header className="relative z-[9998] border-b border-white/10 bg-[#070707]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
@@ -22,9 +22,7 @@ export default function Header({
           <Link href="/">Inicio</Link>
           <Link href="/products">Catálogo</Link>
 
-          {isLoggedIn && !isInternal && (
-            <Link href="/account">Mi cuenta</Link>
-          )}
+          {isLoggedIn && !isInternal && <Link href="/account">Mi cuenta</Link>}
 
           {isInternal && (
             <>
@@ -45,7 +43,7 @@ export default function Header({
           )}
         </nav>
 
-        <MobileMenu isInternal={isInternal} isLoggedIn={isLoggedIn} />
+        <MobileMenu isLoggedIn={isLoggedIn} isInternal={isInternal} />
       </div>
     </header>
   );

@@ -2,8 +2,15 @@ import Header from "@/app/components/Header";
 import ProductCard from "@/app/components/ProductCard";
 import { canSeeWholesalePrice, isInternalUser } from "@/data/roles";
 import { getPublicProducts } from "@/data/productService";
-import { getCurrentProfile } from "@/data/auth";
+import { getCurrentProfile, getCurrentUser } from "@/data/auth";
 import type { Metadata } from "next";
+
+const user = await getCurrentUser();
+const profile = await getCurrentProfile();
+
+const isLoggedIn = Boolean(user);
+const isInternal = Boolean(profile && isInternalUser(profile.role));
+const customerType = profile?.role ?? "minorista";
 
 export const metadata: Metadata = {
   title: "Catálogo de luminarias | Luminarg",
@@ -20,7 +27,7 @@ export default async function ProductsPage() {
 
   return (
     <main className="min-h-screen bg-[#070707] text-white">
-      <Header />
+      <Header isLoggedIn={isLoggedIn} isInternal={isInternal} />
 
       <section className="px-6 py-12 lg:py-16">
         <div className="mx-auto max-w-7xl">
