@@ -1,67 +1,106 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export type Expense = {
-  id: string;
+  id: number;
+  expense_date: string | null;
+  type: string;
+  category: string;
   description: string;
   amount: number;
   currency: string;
-  type: string;
-  category: string;
-  paid: boolean;
+  paid_by: string | null;
+  payment_method: string | null;
+  supplier: string | null;
+  invoice_number: string | null;
+  notes: string | null;
+  is_paid: boolean;
   created_at: string;
 };
 
-export async function getExpenses(filters?: {
-  type?: string;
-  category?: string;
-  currency?: string;
-  paid?: string;
-}) {
-  let query = supabaseAdmin.from("expenses").select("*").order("created_at", {
-    ascending: false,
-  });
-
-  if (filters?.type) query = query.eq("type", filters.type);
-  if (filters?.category) query = query.eq("category", filters.category);
-  if (filters?.currency) query = query.eq("currency", filters.currency);
-  if (filters?.paid === "paid") query = query.eq("paid", true);
-  if (filters?.paid === "pending") query = query.eq("paid", false);
-
-  const { data, error } = await query;
+export async function getExpenses() {
+  const { data, error } = await supabaseAdmin
+    .from("expenses")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    console.error("Error fetching expenses:", error);
     return [];
   }
 
-  return data as Expense[];
+  return (data ?? []) as Expense[];
+}
+
+export async function getExpenseById(id: number) {
+  const { data, error } = await supabaseAdmin
+    .from("expenses")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching expense:", error);
+    return null;
+  }
+
+  return data as Expense;
 }
 
 export async function createExpense(input: {
+  expenseDate: string;
+  type: string;
+  category: string;
   description: string;
   amount: number;
   currency: string;
-  type: string;
-  category: string;
-  paid: boolean;
+  paidBy: string;
+  paymentMethod: string;
+  supplier: string;
+  invoiceNumber: string;
+  notes: string;
+  isPaid: boolean;
 }) {
   const { error } = await supabaseAdmin.from("expenses").insert({
+    expense_date: input.expenseDate || null,
+    type: input.type,
+    category: input.category,
     description: input.description,
     amount: input.amount,
     currency: input.currency,
-    type: input.type,
-    category: input.category,
-    paid: input.paid,
+    paid_by: input.paidBy || null,
+    payment_method: input.paymentMethod || null,
+    supplier: input.supplier || null,
+    invoice_number: input.invoiceNumber || null,
+    notes: input.notes || null,
+    is_paid: input.isPaid,
   });
 
-  if (error) throw new Error("Error creando gasto");
+  if (error) {
+    console.error("Error creating expense:", error);
+    throw new Error("No se pudo crear el gasto");
+  }
 }
 
-export async function toggleExpensePaid(id: string, paid: boolean) {
+export async function updateExpensePaidState(id: number, isPaid: boolean) {
   const { error } = await supabaseAdmin
     .from("expenses")
-    .update({ paid })
+    .update({ is_paid: isPaid })
     .eq("id", id);
 
-  if (error) throw new Error("Error actualizando gasto");
+  if (error) {
+    console.error("Error updating expense paid state:", error);
+    throw new Error("No se pudo actualizar el estado del gasto");
+  }
+}
+
+export async function deleteExpense(id: number) {
+  const { error } = await supabaseAdmin
+    .from("expenses")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error deleting expense:", error);
+    throw new Error("No se pudo eliminar el gasto");
+  }
 }
