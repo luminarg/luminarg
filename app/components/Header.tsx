@@ -1,30 +1,38 @@
 import Link from "next/link";
 import { getCurrentProfile } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
+import CartDropdown from "./CartDropdown";
+import MobileMenu from "./MobileMenu";
 
 export default async function Header() {
   const profile = await getCurrentProfile();
   const isInternal = profile && isInternalUser(profile.role);
+  const isLoggedIn = Boolean(profile);
 
   return (
-    <header className="border-b border-white/10">
+    <header className="border-b border-white/10 bg-[#070707]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-        <div className="text-xl font-light tracking-[0.35em]">
+        <Link href="/" className="text-xl font-light tracking-[0.35em]">
           LUMIN<span className="text-[#d6b36a]">A</span>RG
-        </div>
+        </Link>
 
-        <nav className="hidden gap-8 text-sm text-neutral-400 md:flex">
+        <nav className="hidden items-center gap-8 text-sm text-neutral-400 md:flex">
           <Link href="/">Inicio</Link>
           <Link href="/products">Catálogo</Link>
+
+          {profile && !isInternal && <Link href="/account">Mi cuenta</Link>}
 
           {isInternal && (
             <>
               <Link href="/internal/dashboard">Dashboard</Link>
               <Link href="/internal/products">Productos</Link>
               <Link href="/internal/expenses">Gastos</Link>
+              <Link href="/internal/sales">Ventas</Link>
               <Link href="/internal/users">Usuarios</Link>
             </>
           )}
+
+          <CartDropdown />
 
           {profile ? (
             <Link href="/logout">Salir</Link>
@@ -32,6 +40,8 @@ export default async function Header() {
             <Link href="/login">Ingresar</Link>
           )}
         </nav>
+
+        <MobileMenu isInternal={Boolean(isInternal)} isLoggedIn={isLoggedIn} />
       </div>
     </header>
   );

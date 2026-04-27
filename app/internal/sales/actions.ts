@@ -7,6 +7,7 @@ import {
   cancelSale,
   DeliveryStatus,
   markSaleAsPaid,
+  markSaleAsShipped,
   updateSaleDeliveryStatus,
 } from "@/data/saleService";
 
@@ -49,6 +50,21 @@ export async function updateSaleDeliveryStatusAction(
   await requireInternalUser();
 
   await updateSaleDeliveryStatus(id, deliveryStatus);
+
+  revalidatePath("/internal/sales");
+  revalidatePath(`/internal/sales/${id}`);
+  revalidatePath("/internal/dashboard");
+}
+
+export async function markSaleAsShippedAction(id: number, formData: FormData) {
+  await requireInternalUser();
+
+  await markSaleAsShipped(id, {
+    carrier: String(formData.get("carrier") || ""),
+    trackingId: String(formData.get("trackingId") || ""),
+    trackingUrl: String(formData.get("trackingUrl") || ""),
+    shippingNotes: String(formData.get("shippingNotes") || ""),
+  });
 
   revalidatePath("/internal/sales");
   revalidatePath(`/internal/sales/${id}`);

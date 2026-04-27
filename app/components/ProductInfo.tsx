@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Product } from "@/data/schemas";
+import AddToCartButton from "@/app/components/AddToCartButton";
 
 type ProductInfoProps = {
   product: Product;
@@ -8,20 +9,12 @@ type ProductInfoProps = {
   buttonHref?: string;
 };
 
-const WHATSAPP_NUMBER = "543532468081";
-
 export default function ProductInfo({
   product,
   visiblePrice,
   buttonLabel,
   buttonHref,
 }: ProductInfoProps) {
-  const whatsappMessage = encodeURIComponent(
-    `Hola Luminarg, quiero consultar por el producto ${product.name} (${product.sku}).`
-  );
-
-  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
-
   return (
     <div>
       <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
@@ -40,7 +33,7 @@ export default function ProductInfo({
         ${visiblePrice.toLocaleString("es-AR")}
       </p>
 
-      <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+      <div className="mt-10">
         {buttonHref ? (
           <Link
             href={buttonHref}
@@ -49,22 +42,13 @@ export default function ProductInfo({
             {buttonLabel}
           </Link>
         ) : (
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full bg-white px-6 py-3 text-center text-sm font-medium text-black transition hover:bg-neutral-200"
-          >
-            Comprar / Consultar
-          </a>
+          <AddToCartButton
+            productId={product.id}
+            name={product.name}
+            price={visiblePrice}
+            stock={product.stock}
+          />
         )}
-
-        <a
-          href={`mailto:info@luminarg.com.ar?subject=Consulta%20Luminarg`}
-          className="rounded-full border border-white/20 px-6 py-3 text-center text-sm font-medium text-white transition hover:bg-white/10"
-        >
-          Enviar email
-        </a>
       </div>
     </div>
   );

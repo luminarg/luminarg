@@ -6,7 +6,7 @@ import { getSaleById } from "@/data/saleService";
 import {
   cancelSaleAction,
   markSaleAsPaidAction,
-  updateSaleDeliveryStatusAction,
+  markSaleAsShippedAction,
 } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +49,11 @@ function statusClass(status: string) {
     return "text-green-400";
   }
 
-  if (status === "pending_payment" || status === "pending" || status === "preparing") {
+  if (
+    status === "pending_payment" ||
+    status === "pending" ||
+    status === "preparing"
+  ) {
     return "text-yellow-300";
   }
 
@@ -131,11 +135,15 @@ export default async function InternalSaleDetailPage({
               </p>
               <p>
                 Email:{" "}
-                <span className="text-white">{sale.customer_email || "-"}</span>
+                <span className="text-white">
+                  {sale.customer_email || "-"}
+                </span>
               </p>
               <p>
                 Teléfono:{" "}
-                <span className="text-white">{sale.customer_phone || "-"}</span>
+                <span className="text-white">
+                  {sale.customer_phone || "-"}
+                </span>
               </p>
             </div>
           </Card>
@@ -184,6 +192,49 @@ export default async function InternalSaleDetailPage({
             </div>
           </Card>
         </section>
+
+        {(sale.shipping_carrier ||
+          sale.shipping_tracking_id ||
+          sale.shipping_tracking_url ||
+          sale.shipping_notes) && (
+          <Card title="Seguimiento / transporte">
+            <div className="space-y-2 text-sm text-neutral-400">
+              <p>
+                Transporte:{" "}
+                <span className="text-white">
+                  {sale.shipping_carrier || "-"}
+                </span>
+              </p>
+              <p>
+                Tracking ID:{" "}
+                <span className="text-white">
+                  {sale.shipping_tracking_id || "-"}
+                </span>
+              </p>
+              <p>
+                Link:{" "}
+                {sale.shipping_tracking_url ? (
+                  <a
+                    href={sale.shipping_tracking_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#d6b36a]"
+                  >
+                    Ver seguimiento
+                  </a>
+                ) : (
+                  <span className="text-white">-</span>
+                )}
+              </p>
+              <p>
+                Notas envío:{" "}
+                <span className="text-white">
+                  {sale.shipping_notes || "-"}
+                </span>
+              </p>
+            </div>
+          </Card>
+        )}
 
         <section className="border border-white/10 bg-white/[0.03] p-5">
           <h2 className="mb-5 text-xl font-light">Productos</h2>
@@ -306,6 +357,63 @@ export default async function InternalSaleDetailPage({
           </Card>
         )}
 
+        {sale.payment_status === "paid" &&
+          sale.status !== "cancelled" &&
+          sale.delivery_status !== "shipped" &&
+          sale.delivery_status !== "delivered" && (
+            <section className="border border-white/10 bg-white/[0.03] p-5">
+              <h2 className="mb-4 text-xl font-light">
+                Marcar como enviado
+              </h2>
+
+              <form
+                action={markSaleAsShippedAction.bind(null, sale.id)}
+                className="grid gap-4 md:grid-cols-2"
+              >
+                <Field label="Transporte">
+                  <input
+                    name="carrier"
+                    placeholder="Ej: Andreani, OCA, Correo Argentino"
+                    className="input-dark"
+                  />
+                </Field>
+
+                <Field label="Número de seguimiento">
+                  <input
+                    name="trackingId"
+                    placeholder="Ej: 123456789"
+                    className="input-dark"
+                  />
+                </Field>
+
+                <Field label="Link de seguimiento">
+                  <input
+                    name="trackingUrl"
+                    placeholder="https://..."
+                    className="input-dark"
+                  />
+                </Field>
+
+                <Field label="Notas de envío">
+                  <input
+                    name="shippingNotes"
+                    placeholder="Observaciones"
+                    className="input-dark"
+                  />
+                </Field>
+
+                <div className="md:col-span-2">
+                  <button
+                    type="submit"
+                    className="rounded-full bg-white px-5 py-3 text-sm font-medium text-black"
+                  >
+                    Guardar envío y marcar enviada
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
         <section className="flex flex-wrap gap-3">
           {sale.payment_status !== "paid" &&
             sale.status !== "cancelled" && (
@@ -315,25 +423,6 @@ export default async function InternalSaleDetailPage({
                   className="rounded-full bg-white px-5 py-3 text-sm font-medium text-black"
                 >
                   Marcar pagada
-                </button>
-              </form>
-            )}
-
-          {sale.payment_status === "paid" &&
-            sale.status !== "cancelled" &&
-            sale.delivery_status !== "delivered" && (
-              <form
-                action={updateSaleDeliveryStatusAction.bind(
-                  null,
-                  sale.id,
-                  nextDeliveryStatus(sale.delivery_status)
-                )}
-              >
-                <button
-                  type="submit"
-                  className="rounded-full border border-white/10 px-5 py-3 text-sm text-neutral-300 hover:border-white/30"
-                >
-                  Avanzar entrega
                 </button>
               </form>
             )}
@@ -354,13 +443,6 @@ export default async function InternalSaleDetailPage({
   );
 }
 
-function nextDeliveryStatus(current: string) {
-  if (current === "pending") return "preparing";
-  if (current === "preparing") return "shipped";
-  if (current === "shipped") return "delivered";
-  return "pending";
-}
-
 function Card({
   title,
   children,
@@ -373,5 +455,20 @@ function Card({
       <h2 className="mb-4 text-xl font-light">{title}</h2>
       {children}
     </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm text-neutral-400">{label}</span>
+      {children}
+    </label>
   );
 }

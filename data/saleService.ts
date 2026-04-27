@@ -44,6 +44,10 @@ export type Sale = {
   shipping_province: string;
   shipping_postal_code: string | null;
   shipping_reference: string | null;
+  shipping_carrier: string | null;
+  shipping_tracking_id: string | null;
+  shipping_tracking_url: string | null;
+  shipping_notes: string | null;
   notes: string | null;
   paid_at: string | null;
   cancelled_at: string | null;
@@ -106,6 +110,10 @@ function mapSale(row: any): Sale {
     shipping_province: row.shipping_province,
     shipping_postal_code: row.shipping_postal_code,
     shipping_reference: row.shipping_reference,
+    shipping_carrier: row.shipping_carrier,
+    shipping_tracking_id: row.shipping_tracking_id,
+    shipping_tracking_url: row.shipping_tracking_url,
+    shipping_notes: row.shipping_notes,
     notes: row.notes,
     paid_at: row.paid_at,
     cancelled_at: row.cancelled_at,
@@ -215,6 +223,34 @@ export async function updateSaleDeliveryStatus(
   if (error) {
     console.error("Error updating sale delivery status:", error);
     throw new Error("No se pudo actualizar el estado de entrega");
+  }
+}
+
+export async function markSaleAsShipped(
+  id: number,
+  shippingData: {
+    carrier: string;
+    trackingId: string;
+    trackingUrl: string;
+    shippingNotes: string;
+  }
+) {
+  const { error } = await supabaseAdmin
+    .from("sales")
+    .update({
+      status: "shipped",
+      delivery_status: "shipped",
+      shipping_carrier: shippingData.carrier || null,
+      shipping_tracking_id: shippingData.trackingId || null,
+      shipping_tracking_url: shippingData.trackingUrl || null,
+      shipping_notes: shippingData.shippingNotes || null,
+    })
+    .eq("id", id)
+    .neq("status", "cancelled");
+
+  if (error) {
+    console.error("Error marking sale as shipped:", error);
+    throw new Error("No se pudo marcar la venta como enviada");
   }
 }
 
