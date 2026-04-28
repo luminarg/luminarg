@@ -23,7 +23,7 @@ export default async function CheckoutPage() {
 
       <main className="min-h-screen bg-[#070707] px-4 py-12 text-white sm:px-6 lg:py-16">
         <div className="mx-auto max-w-7xl">
-          <CheckoutClient userId={user.id} />
+          <CheckoutClient />
         </div>
       </main>
     </>
