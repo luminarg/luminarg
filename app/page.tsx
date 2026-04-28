@@ -1,7 +1,4 @@
 import Link from "next/link";
-import { getCurrentProfile } from "@/data/auth";
-import { isInternalUser } from "@/data/roles";
-import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
 import { getFeaturedProducts } from "../data/productService";
@@ -19,7 +16,6 @@ export const metadata: Metadata = {
     "Luminarg ofrece luminarias decorativas y funcionales para hogares, comercios y proyectos.",
 };
 
-export const dynamic = "force-dynamic";
 
 const WHATSAPP_NUMBER = "543532468081";
 const EMAIL = "info@luminarg.com.ar";
@@ -33,7 +29,7 @@ export default async function Home() {
 
   return (
     <main className="bg-[#070707] text-white">
-      <Header />
+      
 
       {/* HERO */}
       <section className="relative min-h-screen overflow-hidden">

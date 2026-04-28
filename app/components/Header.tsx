@@ -14,17 +14,16 @@ export default function Header({
   return (
     <header className="relative z-[9998] border-b border-white/10 bg-[#070707]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-        <Link href="/" className="text-xl font-light tracking-[0.35em]">
+        <Link href="/" className="text-xl font-light tracking-[0.35em] text-white">
           LUMIN<span className="text-[#d6b36a]">A</span>RG
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm text-neutral-400 md:flex">
+        <nav className="hidden items-center gap-8 text-sm text-neutral-400 lg:flex">
           <Link href="/">Inicio</Link>
           <Link href="/products">Catálogo</Link>
+          <Link href="/cart">Carrito</Link>
 
-          {isLoggedIn && !isInternal && <Link href="/account">Mi cuenta</Link>}
-
-          {isInternal && (
+          {isInternal ? (
             <>
               <Link href="/internal/dashboard">Dashboard</Link>
               <Link href="/internal/products">Productos</Link>
@@ -32,18 +31,30 @@ export default function Header({
               <Link href="/internal/sales">Ventas</Link>
               <Link href="/internal/users">Usuarios</Link>
             </>
+          ) : null}
+
+          {isLoggedIn && !isInternal ? (
+            <Link href="/account" className="text-white">
+              Mi cuenta
+            </Link>
+          ) : null}
+
+          {isLoggedIn ? (
+            <Link href="/logout" className="text-white">
+              Salir
+            </Link>
+          ) : (
+            <Link href="/login" className="text-white">
+              Ingresar
+            </Link>
           )}
 
           <CartDropdown />
-
-          {isLoggedIn ? (
-            <Link href="/logout">Salir</Link>
-          ) : (
-            <Link href="/login">Ingresar</Link>
-          )}
         </nav>
 
-        <MobileMenu isLoggedIn={isLoggedIn} isInternal={isInternal} />
+        <div className="lg:hidden">
+          <MobileMenu isLoggedIn={isLoggedIn} isInternal={isInternal} />
+        </div>
       </div>
     </header>
   );

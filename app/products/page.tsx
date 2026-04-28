@@ -18,7 +18,7 @@ export default async function ProductsPage() {
 
   return (
     <main className="min-h-screen bg-[#070707] text-white">
-      <Header isLoggedIn={false} isInternal={false} />
+      
 
       <section className="px-6 py-12 lg:py-16">
         <div className="mx-auto max-w-7xl">

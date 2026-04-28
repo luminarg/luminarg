@@ -4,11 +4,15 @@ import { loginAction } from "./actions";
 type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
+    next?: string;
   }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error } = await searchParams;
+  const params = await searchParams;
+
+  const error = params?.error;
+  const next = params?.next || "/";
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-6 py-20 text-white">
@@ -29,8 +33,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           )}
 
-          
-
           <div className="mb-6 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/10" />
             <span className="text-xs uppercase tracking-[0.2em] text-neutral-500">
@@ -40,6 +42,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
 
           <form action={loginAction}>
+            {/* 👇 CLAVE PARA QUE NO SE PIERDA LA REDIRECCIÓN */}
+            <input type="hidden" name="next" value={next} />
+
             <div>
               <label className="mb-2 block text-sm text-neutral-400">
                 Email

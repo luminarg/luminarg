@@ -1,4 +1,3 @@
-import Header from "@/app/components/Header";
 import CartClient from "./CartClient";
 import { getCurrentProfile, getCurrentUser } from "@/data/auth";
 import { isInternalUser } from "@/data/roles";
@@ -14,7 +13,7 @@ export default async function CartPage() {
 
   return (
     <main className="min-h-screen bg-[#070707] text-white">
-      <Header isLoggedIn={isLoggedIn} isInternal={isInternal} />
+      
 
       <section className="px-4 py-12 sm:px-6 lg:py-16">
         <div className="mx-auto max-w-5xl">

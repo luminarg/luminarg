@@ -18,7 +18,8 @@ export async function createSupabaseServerClient() {
               cookieStore.set(name, value, options);
             });
           } catch {
-            // Ignorar en Server Components.
+            // En Server Components puede fallar.
+            // El proxy se encarga de refrescar/escribir cookies.
           }
         },
       },
