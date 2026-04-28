@@ -1,25 +1,34 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/app/components/Header";
-import { getCurrentProfile, getCurrentUser } from "@/data/auth";
-import { isInternalUser } from "@/data/roles";
 
-export default async function RootLayout({
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Luminarg | Luminarias de diseño",
+  description:
+    "Luminarg ofrece luminarias decorativas y funcionales para hogares, comercios y proyectos.",
+};
+
+export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  const user = await getCurrentUser();
-  const profile = await getCurrentProfile();
-
-  const isLoggedIn = !!user;
-  const isInternal = isInternalUser(profile?.role);
-
+}>) {
   return (
-    <html lang="es">
-      <body>
-        <Header isLoggedIn={isLoggedIn} isInternal={isInternal} />
-        {children}
-      </body>
+    <html
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full bg-[#070707]">{children}</body>
     </html>
   );
 }

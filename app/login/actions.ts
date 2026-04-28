@@ -24,28 +24,24 @@ export async function loginAction(formData: FormData) {
     redirect("/login?error=credenciales");
   }
 
-  // 👇 Obtener usuario
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?error=credenciales");
   }
 
-  // 👇 Obtener perfil
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
 
-  // 👇 ADMIN → dashboard SIEMPRE
   if (profile && isInternalUser(profile.role as UserRole)) {
     redirect("/internal/dashboard");
   }
 
-  // 👇 CLIENTE → respeta next o va a cuenta
   if (next && next.startsWith("/")) {
     redirect(next);
   }

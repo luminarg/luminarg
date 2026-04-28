@@ -8,7 +8,9 @@ export async function getCurrentUser() {
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) return null;
+  if (error || !user) {
+    return null;
+  }
 
   return user;
 }
@@ -21,7 +23,9 @@ export async function getCurrentProfile() {
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) return null;
+  if (error || !user) {
+    return null;
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
