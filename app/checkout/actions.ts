@@ -13,6 +13,10 @@ export async function checkoutAction(formData: FormData) {
 
     const cart = JSON.parse(String(formData.get("cart") || "[]"));
 
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return { success: false, error: "El carrito está vacío." };
+    }
+
     const shipping = {
       name: String(formData.get("name") || ""),
       phone: String(formData.get("phone") || ""),
