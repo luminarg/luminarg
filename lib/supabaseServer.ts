@@ -15,16 +15,12 @@ export async function createSupabaseServerClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, {
-                ...options,
-                path: "/",
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production",
-              });
+              cookieStore.set(name, value, options);
             });
           } catch {
-            // En Server Components puede fallar.
-            // El proxy se encarga de refrescar/escribir cookies.
+            // Server Components no permiten escribir cookies.
+            // Es seguro ignorar este error: el proxy.ts ya se encargó
+            // de refrescar y persistir las cookies en la response.
           }
         },
       },
