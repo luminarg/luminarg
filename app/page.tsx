@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import ProductCard from "./components/ProductCard";
 import { getFeaturedProducts } from "../data/productService";
 import type { Metadata } from "next";
+import Header from "./components/Header";
 import {
   Package,
   Truck,
@@ -28,7 +29,9 @@ export default async function Home() {
   const featuredProducts = await getFeaturedProducts();
 
   return (
+    
     <main className="bg-[#070707] text-white">
+      <Header isLoggedIn={true} isInternal={false} />
       
 
       {/* HERO */}
