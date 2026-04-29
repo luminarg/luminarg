@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Header from "@/app/components/Header";
 import { canSeeWholesalePrice, isInternalUser } from "@/data/roles";
 import { getProductBySlug } from "@/data/productService";
 import ProductInfo from "@/app/components/ProductInfo";
@@ -50,7 +49,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product || !product.isActive) {
     return (
       <main className="min-h-screen bg-[#070707] text-white">
-        <Header isLoggedIn={false} isInternal={false} />
+        
 
         <section className="px-6 py-20">
           <div className="mx-auto max-w-4xl">
@@ -81,8 +80,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="min-h-screen bg-[#070707] text-white">
-      <Header isLoggedIn={false} isInternal={false} />
-
+      
       <section className="px-6 py-12 lg:py-16">
         <div className="mx-auto max-w-6xl">
           <Link

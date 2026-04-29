@@ -1,4 +1,4 @@
-import Header from "@/app/components/Header";
+
 import ProductCard from "@/app/components/ProductCard";
 import { canSeeWholesalePrice, isInternalUser } from "@/data/roles";
 import { getPublicProducts } from "@/data/productService";
