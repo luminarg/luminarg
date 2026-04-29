@@ -8,6 +8,8 @@ type LoginPageProps = {
   }>;
 };
 
+
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
 
