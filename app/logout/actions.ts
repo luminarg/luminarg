@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+"use server";
+
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
-export async function GET(request: Request) {
+export async function logoutAction() {
   const supabase = await createSupabaseServerClient();
-
   await supabase.auth.signOut();
-
-  return NextResponse.redirect(new URL("/", request.url));
+  redirect("/");
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import CartDropdown from "./CartDropdown";
 import MobileMenu from "./MobileMenu";
 import { isInternalUser, type UserRole } from "@/data/roles";
+import { logoutAction } from "@/app/logout/actions";
 
 export default async function Header() {
   const h = await headers();
@@ -44,9 +45,14 @@ export default async function Header() {
           ) : null}
 
           {isLoggedIn ? (
-            <Link href="/logout" className="text-white">
-              Salir
-            </Link>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="text-white hover:text-neutral-300"
+              >
+                Salir
+              </button>
+            </form>
           ) : (
             <Link href="/login" className="text-white">
               Ingresar
@@ -63,4 +69,3 @@ export default async function Header() {
     </header>
   );
 }
-

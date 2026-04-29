@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { logoutAction } from "@/app/logout/actions";
 
 type Props = {
   isInternal?: boolean;
@@ -52,7 +53,15 @@ export default function MobileMenu({
             <div className="h-px bg-white/10" />
 
             {isLoggedIn ? (
-              <Link href="/logout" onClick={close}>Salir</Link>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  onClick={close}
+                  className="text-left text-neutral-300"
+                >
+                  Salir
+                </button>
+              </form>
             ) : (
               <Link href="/login" onClick={close}>Ingresar</Link>
             )}
