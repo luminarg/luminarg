@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { loginAction } from "./actions";
-import Header from "@/app/components/Header";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -17,7 +16,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <>
-      <Header isLoggedIn={false} isInternal={false} />
+      
 
       <main className="min-h-screen bg-[#0a0a0a] px-6 py-20 text-white">
         <div className="mx-auto max-w-md">

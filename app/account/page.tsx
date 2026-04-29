@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import Header from "@/app/components/Header";
 import { getCurrentUser } from "@/data/auth";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
