@@ -1,20 +1,16 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import CartDropdown from "./CartDropdown";
 import MobileMenu from "./MobileMenu";
-import { getCurrentProfile } from "@/data/auth";
-import { isInternalUser } from "@/data/roles";
+import { isInternalUser, type UserRole } from "@/data/roles";
 
-// Props legacy: se aceptan para no romper pages existentes pero se ignoran.
-// El Header ahora lee la sesión por su cuenta.
-type HeaderProps = {
-  isLoggedIn?: boolean;
-  isInternal?: boolean;
-};
+export default async function Header() {
+  const h = await headers();
+  const userId = h.get("x-user-id");
+  const role = h.get("x-user-role") as UserRole | null;
 
-export default async function Header(_props: HeaderProps = {}) {
-  const profile = await getCurrentProfile();
-  const isLoggedIn = !!profile;
-  const isInternal = profile ? isInternalUser(profile.role) : false;
+  const isLoggedIn = !!userId;
+  const isInternal = role ? isInternalUser(role) : false;
 
   return (
     <header className="relative z-[9998] border-b border-white/10 bg-[#070707]/95 backdrop-blur">
