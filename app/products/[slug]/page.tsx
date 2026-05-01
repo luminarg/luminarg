@@ -91,7 +91,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </Link>
 
           <div className="mt-10 grid gap-10 md:grid-cols-2">
-            <div className="min-h-[420px] overflow-hidden rounded-[32px] border border-white/10 bg-black">
+            <div className="min-h-[420px] overflow-hidden border border-white/[0.08] bg-black">
               {product.imageUrl ? (
                 <img
                   src={product.imageUrl}

@@ -35,7 +35,7 @@ export default async function ProductsPage() {
               </p>
             </div>
 
-            <div className="rounded-full border border-white/10 px-4 py-2 text-sm text-neutral-400">
+            <div className="border border-white/[0.07] px-4 py-2 text-sm text-neutral-500">
               Vista actual: minorista
             </div>
           </div>

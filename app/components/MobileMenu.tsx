@@ -29,7 +29,7 @@ export default function MobileMenu({
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-full mt-5 w-72 rounded-2xl border border-white/10 bg-[#070707] p-6 shadow-2xl">
+        <div className="absolute right-0 top-full mt-5 w-72 border border-white/10 bg-[#070707] p-6 shadow-2xl">
           <div className="flex flex-col gap-4 text-sm text-neutral-300">
             <Link href="/" onClick={close}>Inicio</Link>
             <Link href="/products" onClick={close}>Catálogo</Link>

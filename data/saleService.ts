@@ -257,17 +257,9 @@ export async function markSaleAsShipped(
 export async function markSaleAsPaid(id: number, profileId: string) {
   const sale = await getSaleById(id);
 
-  if (!sale) {
-    throw new Error("Venta no encontrada");
-  }
-
-  if (sale.status === "cancelled") {
-    throw new Error("No se puede cobrar una venta cancelada");
-  }
-
-  if (sale.payment_status === "paid") {
-    return;
-  }
+  if (!sale) throw new Error("Venta no encontrada");
+  if (sale.status === "cancelled") throw new Error("No se puede cobrar una venta cancelada");
+  if (sale.payment_status === "paid") return;
 
   for (const item of sale.items) {
     const { data: product, error: productError } = await supabaseAdmin
@@ -276,27 +268,19 @@ export async function markSaleAsPaid(id: number, profileId: string) {
       .eq("id", item.product_id)
       .single();
 
-    if (productError || !product) {
-      console.error("Error fetching product stock:", productError);
-      throw new Error(`No se pudo verificar stock de ${item.product_name}`);
-    }
+    if (productError || !product) throw new Error(`No se pudo verificar stock de ${item.product_name}`);
 
     const previousStock = Number(product.stock ?? 0);
     const newStock = previousStock - item.quantity;
 
-    if (newStock < 0) {
-      throw new Error(`Stock insuficiente para ${item.product_name}`);
-    }
+    if (newStock < 0) throw new Error(`Stock insuficiente para ${item.product_name}`);
 
     const { error: updateStockError } = await supabaseAdmin
       .from("products")
       .update({ stock: newStock })
       .eq("id", item.product_id);
 
-    if (updateStockError) {
-      console.error("Error updating product stock:", updateStockError);
-      throw new Error(`No se pudo descontar stock de ${item.product_name}`);
-    }
+    if (updateStockError) throw new Error(`No se pudo descontar stock de ${item.product_name}`);
 
     const { error: movementError } = await supabaseAdmin
       .from("stock_movements")
@@ -311,52 +295,53 @@ export async function markSaleAsPaid(id: number, profileId: string) {
         created_by: profileId,
       });
 
-    if (movementError) {
-      console.error("Error creating stock movement:", movementError);
-      throw new Error("No se pudo registrar el movimiento de stock");
-    }
+    if (movementError) throw new Error("No se pudo registrar el movimiento de stock");
   }
 
   const now = new Date().toISOString();
 
   const { error: saleError } = await supabaseAdmin
     .from("sales")
-    .update({
-      status: "paid",
-      payment_status: "paid",
-      paid_at: now,
-    })
+    .update({ status: "paid", payment_status: "paid", paid_at: now })
     .eq("id", id);
 
-  if (saleError) {
-    console.error("Error updating sale as paid:", saleError);
-    throw new Error("No se pudo marcar la venta como pagada");
-  }
+  if (saleError) throw new Error("No se pudo marcar la venta como pagada");
 
   const { error: paymentError } = await supabaseAdmin
     .from("sale_payments")
-    .update({
-      status: "approved",
-      approved_at: now,
-    })
+    .update({ status: "approved", approved_at: now })
     .eq("sale_id", id);
 
-  if (paymentError) {
-    console.error("Error updating payment as approved:", paymentError);
-    throw new Error("No se pudo aprobar el pago");
+  if (paymentError) throw new Error("No se pudo aprobar el pago");
+}
+
+export async function updateShippingTracking(
+  id: number,
+  data: {
+    carrier: string;
+    trackingId: string;
+    trackingUrl: string;
+    shippingNotes: string;
   }
+) {
+  const { error } = await supabaseAdmin
+    .from("sales")
+    .update({
+      shipping_carrier: data.carrier || null,
+      shipping_tracking_id: data.trackingId || null,
+      shipping_tracking_url: data.trackingUrl || null,
+      shipping_notes: data.shippingNotes || null,
+    })
+    .eq("id", id);
+
+  if (error) throw new Error("No se pudo guardar el seguimiento");
 }
 
 export async function cancelSale(id: number, profileId: string) {
   const sale = await getSaleById(id);
 
-  if (!sale) {
-    throw new Error("Venta no encontrada");
-  }
-
-  if (sale.status === "cancelled") {
-    return;
-  }
+  if (!sale) throw new Error("Venta no encontrada");
+  if (sale.status === "cancelled") return;
 
   const shouldRestoreStock = sale.payment_status === "paid";
 
@@ -368,10 +353,7 @@ export async function cancelSale(id: number, profileId: string) {
         .eq("id", item.product_id)
         .single();
 
-      if (productError || !product) {
-        console.error("Error fetching product stock:", productError);
-        throw new Error(`No se pudo verificar stock de ${item.product_name}`);
-      }
+      if (productError || !product) throw new Error(`No se pudo verificar stock de ${item.product_name}`);
 
       const previousStock = Number(product.stock ?? 0);
       const newStock = previousStock + item.quantity;
@@ -381,10 +363,7 @@ export async function cancelSale(id: number, profileId: string) {
         .update({ stock: newStock })
         .eq("id", item.product_id);
 
-      if (updateStockError) {
-        console.error("Error restoring product stock:", updateStockError);
-        throw new Error(`No se pudo restaurar stock de ${item.product_name}`);
-      }
+      if (updateStockError) throw new Error(`No se pudo restaurar stock de ${item.product_name}`);
 
       const { error: movementError } = await supabaseAdmin
         .from("stock_movements")
@@ -395,14 +374,11 @@ export async function cancelSale(id: number, profileId: string) {
           quantity: item.quantity,
           previous_stock: previousStock,
           new_stock: newStock,
-          notes: `Cancelación venta #${sale.id}`,
+          notes: `Cancelacion venta #${sale.id}`,
           created_by: profileId,
         });
 
-      if (movementError) {
-        console.error("Error creating stock restore movement:", movementError);
-        throw new Error("No se pudo registrar la devolución de stock");
-      }
+      if (movementError) throw new Error("No se pudo registrar la devolucion de stock");
     }
   }
 
@@ -412,27 +388,18 @@ export async function cancelSale(id: number, profileId: string) {
     .from("sales")
     .update({
       status: "cancelled",
-      payment_status:
-        sale.payment_status === "paid" ? "refunded" : "cancelled",
+      payment_status: sale.payment_status === "paid" ? "refunded" : "cancelled",
       delivery_status: "cancelled",
       cancelled_at: now,
     })
     .eq("id", id);
 
-  if (saleError) {
-    console.error("Error cancelling sale:", saleError);
-    throw new Error("No se pudo cancelar la venta");
-  }
+  if (saleError) throw new Error("No se pudo cancelar la venta");
 
   const { error: paymentError } = await supabaseAdmin
     .from("sale_payments")
-    .update({
-      status: sale.payment_status === "paid" ? "refunded" : "cancelled",
-    })
+    .update({ status: sale.payment_status === "paid" ? "refunded" : "cancelled" })
     .eq("sale_id", id);
 
-  if (paymentError) {
-    console.error("Error cancelling payment:", paymentError);
-    throw new Error("No se pudo cancelar el pago");
-  }
+  if (paymentError) throw new Error("No se pudo cancelar el pago");
 }

@@ -1,22 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { checkoutAction } from "./actions";
 import { useCart } from "@/lib/useCart";
-
-type CheckoutClientProps = {
-  userId?: string; // 👈 ahora es opcional
-};
+import { Trash2 } from "lucide-react";
 
 function money(value: number) {
-  return value.toLocaleString("es-AR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  return value.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export default function CheckoutClient({ userId }: CheckoutClientProps) {
-  const { items, total, clearCart, isReady } = useCart();
+export default function CheckoutClient({ userEmail }: { userEmail: string }) {
+  const { items, total, clearCart, isReady, removeItem } = useCart();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,22 +19,14 @@ export default function CheckoutClient({ userId }: CheckoutClientProps) {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       const formData = new FormData(e.currentTarget);
       formData.append("cart", JSON.stringify(items));
-
-      if (userId) {
-        formData.append("userId", userId);
-      }
-
       const res = await checkoutAction(formData);
-
       if (!res.success) {
         setError(res.error || "No se pudo confirmar el pedido");
         return;
       }
-
       clearCart();
       window.location.href = `/gracias/${res.saleId}`;
     } catch (err: any) {
@@ -51,85 +38,139 @@ export default function CheckoutClient({ userId }: CheckoutClientProps) {
 
   if (!isReady) {
     return (
-      <div className="border border-white/10 bg-white/[0.03] p-8 text-neutral-400">
-        Cargando carrito...
+      <div className="border border-white/[0.07] bg-white/[0.02] p-10 text-center text-sm text-neutral-500">
+        Cargando...
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="border border-white/10 bg-white/[0.03] p-8">
-        <h1 className="text-3xl font-light">Tu carrito está vacío</h1>
-        <p className="mt-3 text-neutral-400">
-          Agregá productos desde el catálogo para continuar.
-        </p>
+      <div className="border border-white/[0.07] bg-white/[0.02] p-12 text-center">
+        <p className="text-sm text-neutral-500">Tu carrito esta vacio.</p>
+        <Link
+          href="/products"
+          className="mt-6 inline-block border border-white/10 px-6 py-2.5 text-sm text-neutral-300 transition hover:border-white/30 hover:text-white"
+        >
+          Ver catalogo
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
-      <form
-        onSubmit={handleSubmit}
-        className="border border-white/10 bg-white/[0.03] p-6 sm:p-8"
-      >
-        <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
-          Checkout
-        </p>
-
-        <h1 className="mt-3 text-4xl font-light">Datos de entrega</h1>
+    <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+      {/* Formulario */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <p className="text-xs uppercase tracking-[0.28em] text-neutral-500">Checkout</p>
+          <h1 className="mt-3 text-3xl font-light">Datos de entrega</h1>
+        </div>
 
         {error && (
-          <div className="mt-6 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <div className="border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
             {error}
           </div>
         )}
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2">
-          <input name="name" required className="input-dark" placeholder="Nombre" />
-          <input name="phone" required className="input-dark" placeholder="Teléfono" />
-          <input name="street" required className="input-dark" placeholder="Calle" />
-          <input name="number" required className="input-dark" placeholder="Número" />
-          <input name="city" required className="input-dark" placeholder="Ciudad" />
-          <input name="province" required className="input-dark" placeholder="Provincia" />
-        </div>
+        {/* Contacto */}
+        <section className="border border-white/[0.07] bg-white/[0.02] p-5">
+          <p className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">Contacto</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs text-neutral-500">Email</label>
+              <input name="email" type="email" defaultValue={userEmail} required className="input w-full" placeholder="tu@email.com" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Nombre completo</label>
+              <input name="name" required className="input w-full" placeholder="Juan Garcia" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Telefono</label>
+              <input name="phone" required className="input w-full" placeholder="+54 11 1234-5678" />
+            </div>
+          </div>
+        </section>
+
+        {/* Direccion */}
+        <section className="border border-white/[0.07] bg-white/[0.02] p-5">
+          <p className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">Direccion de entrega</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Calle</label>
+              <input name="street" required className="input w-full" placeholder="Av. Corrientes" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Numero</label>
+              <input name="number" required className="input w-full" placeholder="1234" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Piso / Depto (opcional)</label>
+              <input name="floorApartment" className="input w-full" placeholder="3 B" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Codigo postal</label>
+              <input name="postalCode" className="input w-full" placeholder="1414" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Ciudad</label>
+              <input name="city" required className="input w-full" placeholder="Buenos Aires" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-neutral-500">Provincia</label>
+              <input name="province" required className="input w-full" placeholder="CABA" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-xs text-neutral-500">Referencia (opcional)</label>
+              <input name="reference" className="input w-full" placeholder="Entre calles, color de puerta, etc." />
+            </div>
+          </div>
+        </section>
+
+        {/* Notas */}
+        <section className="border border-white/[0.07] bg-white/[0.02] p-5">
+          <p className="mb-4 text-xs uppercase tracking-[0.2em] text-neutral-500">Notas del pedido</p>
+          <textarea name="notes" rows={3} className="input w-full resize-none" placeholder="Instrucciones especiales, horario preferido de entrega, etc." />
+        </section>
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-8 rounded-full bg-white px-7 py-3 text-sm font-medium text-black disabled:opacity-60"
+          className="w-full bg-white px-5 py-3 text-sm font-medium text-black transition hover:bg-[#d6b36a] disabled:opacity-50"
         >
-          {loading ? "Confirmando..." : "Confirmar pedido"}
+          {loading ? "Confirmando pedido..." : "Confirmar pedido"}
         </button>
+        <p className="text-center text-xs text-neutral-600">
+          El pago se coordina directamente con Luminarg luego de confirmar.
+        </p>
       </form>
 
-      <aside className="h-fit border border-white/10 bg-white/[0.03] p-6">
-        <h2 className="text-2xl font-light">Resumen</h2>
-
-        <div className="mt-6 space-y-4">
+      {/* Resumen */}
+      <aside className="h-fit border border-white/[0.07] bg-white/[0.02] p-6">
+        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Tu pedido</p>
+        <div className="mt-5 space-y-3">
           {items.map((item) => (
-            <div key={item.product_id} className="border-b border-white/10 pb-4">
-              <div className="flex justify-between">
-                <div>
-                  <p>{item.name}</p>
-                  <p className="text-sm text-neutral-500">
-                    Cantidad: {item.quantity}
-                  </p>
-                </div>
-
-                <p>
-                  ARS {money(item.price * item.quantity)}
-                </p>
+            <div key={item.product_id} className="flex items-start justify-between gap-2 border-b border-white/[0.05] pb-3">
+              <div className="min-w-0">
+                <p className="text-sm text-white">{item.name}</p>
+                <p className="text-xs text-neutral-600">{item.quantity} x ARS {money(item.price)}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-sm text-white">ARS {money(item.price * item.quantity)}</span>
+                <button type="button" onClick={() => removeItem(item.product_id)} className="text-neutral-600 transition hover:text-red-400">
+                  <Trash2 size={13} />
+                </button>
               </div>
             </div>
           ))}
         </div>
-
-        <div className="mt-6 flex justify-between border-t border-white/10 pt-5 text-lg">
-          <span>Total</span>
-          <span>ARS {money(total)}</span>
+        <div className="mt-5 flex items-center justify-between border-t border-white/[0.07] pt-4">
+          <span className="text-sm text-neutral-400">Total</span>
+          <span className="text-xl font-light text-white">ARS {money(total)}</span>
         </div>
+        <Link href="/cart" className="mt-4 block text-center text-xs text-neutral-600 transition hover:text-neutral-400">
+          Modificar carrito
+        </Link>
       </aside>
     </div>
   );

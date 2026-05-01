@@ -4,6 +4,10 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
 
+  // Pasamos el pathname a los Server Components vía header,
+  // así el Header puede saber si está en una página interna o no.
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   let response = NextResponse.next({
     request: { headers: requestHeaders },
   });
@@ -31,14 +35,10 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresh de tokens (única llamada a auth en todo el ciclo de la request).
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Pasar info de sesión a los Server Components vía headers.
-  // Así el Header NO necesita volver a tocar Supabase auth, lo cual evita
-  // el doble refresh que rompía las cookies.
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -51,8 +51,6 @@ export async function proxy(request: NextRequest) {
       requestHeaders.set("x-user-role", profile.role);
     }
 
-    // Recrear response con los headers nuevos, preservando las cookies
-    // que setAll pudo haber escrito durante el refresh.
     const cookiesToPreserve = response.cookies.getAll();
     response = NextResponse.next({
       request: { headers: requestHeaders },
@@ -70,4 +68,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-

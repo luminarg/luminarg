@@ -17,7 +17,7 @@ export default function ProductInfo({
 }: ProductInfoProps) {
   return (
     <div>
-      <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
+      <p className="text-xs uppercase tracking-[0.28em] text-neutral-500">
         {product.collection} · {product.type}
       </p>
 
@@ -29,7 +29,7 @@ export default function ProductInfo({
         {product.longDescription}
       </p>
 
-      <p className="mt-8 text-3xl font-medium">
+      <p className="mt-8 text-3xl font-light">
         ${visiblePrice.toLocaleString("es-AR")}
       </p>
 
@@ -37,7 +37,7 @@ export default function ProductInfo({
         {buttonHref ? (
           <Link
             href={buttonHref}
-            className="rounded-full bg-white px-6 py-3 text-center text-sm font-medium text-black"
+            className="inline-block bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-[#d6b36a]"
           >
             {buttonLabel}
           </Link>

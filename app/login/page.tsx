@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { loginAction } from "./actions";
 
@@ -8,82 +9,94 @@ type LoginPageProps = {
   }>;
 };
 
-
-
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-
   const error = params?.error;
   const next = params?.next || "";
 
   return (
-    <>
-      
+    <main className="flex min-h-screen items-center justify-center bg-[#070707] px-6 py-20">
+      <div className="w-full max-w-sm">
 
-      <main className="min-h-screen bg-[#0a0a0a] px-6 py-20 text-white">
-        <div className="mx-auto max-w-md">
-          <div className="mb-10 text-center">
-            <p className="text-sm uppercase tracking-[0.28em] text-neutral-500">
-              LUMINARG
-            </p>
-            <h1 className="mt-3 text-4xl font-light">Ingresar</h1>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8">
-            {error && (
-              <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                {error === "credenciales"
-                  ? "Email o contraseña incorrectos."
-                  : "No se pudo iniciar sesión. Intentá nuevamente."}
-              </div>
-            )}
-
-            <form action={loginAction}>
-              <input type="hidden" name="next" value={next} />
-
-              <div>
-                <label className="mb-2 block text-sm text-neutral-400">
-                  Email
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-                />
-              </div>
-
-              <div className="mt-6">
-                <label className="mb-2 block text-sm text-neutral-400">
-                  Contraseña
-                </label>
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white outline-none"
-                />
-              </div>
-
-              <div className="mt-8 flex gap-4">
-                <button
-                  type="submit"
-                  className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black"
-                >
-                  Ingresar
-                </button>
-
-                <Link
-                  href="/signup"
-                  className="rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-white"
-                >
-                  Crear cuenta
-                </Link>
-              </div>
-            </form>
-          </div>
+        {/* Logo + título */}
+        <div className="mb-10 flex flex-col items-center text-center">
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Luminarg"
+              width={160}
+              height={39}
+              className="h-10 w-auto"
+              priority
+            />
+          </Link>
+          <h1 className="mt-8 text-2xl font-light tracking-tight text-white">
+            Ingresar
+          </h1>
+          <p className="mt-1.5 text-xs text-neutral-600">
+            Accedé a tu cuenta Luminarg
+          </p>
         </div>
-      </main>
-    </>
+
+        {/* Card */}
+        <div className="border border-white/[0.08] bg-white/[0.02] p-7">
+
+          {error && (
+            <div className="mb-5 border border-red-500/20 bg-red-500/[0.06] px-4 py-3 text-xs text-red-300">
+              {error === "credenciales"
+                ? "Email o contraseña incorrectos."
+                : "No se pudo iniciar sesión. Intentá nuevamente."}
+            </div>
+          )}
+
+          <form action={loginAction} className="space-y-5">
+            <input type="hidden" name="next" value={next} />
+
+            <div>
+              <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-500">
+                Email
+              </label>
+              <input
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                className="input-dark"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[10px] font-medium uppercase tracking-[0.15em] text-neutral-500">
+                Contraseña
+              </label>
+              <input
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                className="input-dark"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="submit"
+                className="flex-1 bg-white py-3 text-sm font-medium text-black transition hover:bg-[#d6b36a]"
+              >
+                Ingresar
+              </button>
+
+              <Link
+                href="/signup"
+                className="flex-1 border border-white/10 py-3 text-center text-sm text-neutral-400 transition hover:border-white/20 hover:text-white"
+              >
+                Crear cuenta
+              </Link>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </main>
   );
 }

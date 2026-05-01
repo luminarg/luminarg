@@ -18,9 +18,9 @@ export default function ProductCard({
   return (
     <Link
       href={`${hrefBase}/${product.slug}`}
-      className="block overflow-hidden rounded-2xl border border-white/10 text-white transition hover:border-white/30"
+      className="block overflow-hidden border border-white/[0.08] text-white transition hover:border-white/20"
     >
-      {/* IMAGEN */}
+      {/* Imagen */}
       <div className="h-[220px] w-full overflow-hidden bg-black">
         {product.imageUrl ? (
           <Image
@@ -37,28 +37,28 @@ export default function ProductCard({
         )}
       </div>
 
-      {/* INFO */}
-      <div className="p-6">
-        <h4 className="text-lg">{product.name}</h4>
+      {/* Info */}
+      <div className="p-5">
+        <h4 className="font-light text-white">{product.name}</h4>
 
-        <p className="mt-2 text-sm text-neutral-400 line-clamp-2">
+        <p className="mt-2 line-clamp-2 text-sm text-neutral-500">
           {product.description}
         </p>
 
-        <p className="mt-4 text-lg font-medium">
+        <p className="mt-4 text-lg font-light text-white">
           ${visiblePrice.toLocaleString("es-AR")}
         </p>
 
         {isInternalView && (
-          <div className="mt-4 space-y-1 text-xs text-neutral-500">
+          <div className="mt-3 space-y-0.5 text-xs text-neutral-600">
             <p>Stock: {product.stock}</p>
             <p>Estado: {product.status}</p>
             <p>Colección: {product.collection}</p>
           </div>
         )}
 
-        <p className="mt-4 text-sm text-[#d6b36a]">
-          {isInternalView ? "Editar producto" : "Ver producto"}
+        <p className="mt-4 text-xs uppercase tracking-[0.15em] text-[#d6b36a]">
+          {isInternalView ? "Editar producto" : "Ver producto"} →
         </p>
       </div>
     </Link>
